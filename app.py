@@ -29,7 +29,6 @@ db = SQL("sqlite:///finance.db")
 if not os.environ.get("API_KEY"):
     raise RuntimeError("API_KEY not set")
 
-
 @app.after_request
 def after_request(response):
     """Ensure responses aren't cached"""
@@ -116,7 +115,10 @@ def quote():
         if not symbol:
             return apology("must provide stock", 403)
         stockInfo = lookup(symbol)
-        return render_template("quoted.html", symbol=symbol, stockInfo=stockInfo)
+        if stockInfo is None:
+            return apology("invalid symbol", 403)
+        else:
+            return render_template("quoted.html", symbol=symbol, stockInfo=stockInfo)
     else:
         return render_template("quote.html")
 
