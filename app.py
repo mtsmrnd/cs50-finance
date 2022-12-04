@@ -111,14 +111,14 @@ def logout():
 @login_required
 def quote():
     """Get stock quote."""
-    # if request.method == "POST":
-    #     # symbol = request.form.get("symbol")
-    #     # if not symbol:
-    #     #     return apology("must provide stock", 403)
-    #     # stockInfo = lookup(symbol)
-    #     # return render_template("quoted.html", symbol=symbol, stockInfo=stockInfo)
-    # else:
-        # return redirect("/")
+    if request.method == "POST":
+        symbol = request.form.get("symbol")
+        if not symbol:
+            return apology("must provide stock", 403)
+        stockInfo = lookup(symbol)
+        return render_template("quoted.html", symbol=symbol, stockInfo=stockInfo)
+    else:
+        return render_template("quote.html")
 
 
 @app.route("/register", methods=["GET", "POST"])
