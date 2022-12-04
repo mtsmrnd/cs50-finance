@@ -1,0 +1,12 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Quoted Stock {{ symbol }}
+{% endblock %}
+
+{% block main %}
+
+{{ stockInfo }}
+{{ session["user_id"] }}
+{{ balance }}
+{% endblock %}

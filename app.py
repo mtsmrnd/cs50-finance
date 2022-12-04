@@ -49,7 +49,26 @@ def index():
 @login_required
 def buy():
     """Buy shares of stock"""
-    return apology("TODO")
+    if request.method == "POST":
+        company = request.form.get("symbol")
+        if not company:
+            return apology("must provide stock", 403)
+        stockInfo = lookup(company)
+        user = session["user_id"]
+        if stockInfo is None:
+            return apology("invalid stock", 403)
+        else:
+            price = float(stockInfo["price"])
+            shares = float(request.form.get("shares"))
+            balance = float(db.execute("SELECT cash FROM users WHERE id = ?", user)[0]["cash"])
+            if price*shares > balance:
+                return apology("insufficient funds", 403)
+            else:
+                db.execute("INSERT INTO transactions (share_symbol, share_price, share_qty, user_id) VALUES (?, ?, ?, ?)", company, price, shares, user)
+                db.execute("UPDATE users SET cash = cash - ? WHERE id = ?", price*shares, user)
+                return render_template("test.html", stockInfo=stockInfo, session=session, balance=balance)
+    else:
+        return render_template("buy.html")
 
 
 @app.route("/history")
@@ -116,7 +135,7 @@ def quote():
             return apology("must provide stock", 403)
         stockInfo = lookup(symbol)
         if stockInfo is None:
-            return apology("invalid symbol", 403)
+            return apology("invalid stock", 403)
         else:
             return render_template("quoted.html", symbol=symbol, stockInfo=stockInfo)
     else:
