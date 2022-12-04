@@ -1,1 +1,1 @@
-pk_49442363fae74c7d9d779b92f1e2eede
+export API_KEY=pk_49442363fae74c7d9d779b92f1e2eede

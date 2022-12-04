@@ -58,10 +58,15 @@ def buy():
         if stockInfo is None:
             return apology("invalid stock", 403)
         else:
-            price = stockInfo["price"]
-            shares = request.form.get("shares")
-            db.execute("INSERT INTO transactions (share_symbol, share_price, share_qty, user_id) VALUES (?, ?, ?, ?)", company, price, shares, user)
-            return render_template("test.html", stockInfo=stockInfo, session=session)
+            price = float(stockInfo["price"])
+            shares = float(request.form.get("shares"))
+            balance = float(db.execute("SELECT cash FROM users WHERE id = ?", user)[0]["cash"])
+            if price*shares > balance:
+                return apology("insufficient funds", 403)
+            else:
+                db.execute("INSERT INTO transactions (share_symbol, share_price, share_qty, user_id) VALUES (?, ?, ?, ?)", company, price, shares, user)
+                db.execute("UPDATE users SET cash = cash - ? WHERE id = ?", price*shares, user)
+                return render_template("test.html", stockInfo=stockInfo, session=session, balance=balance)
     else:
         return render_template("buy.html")
 
