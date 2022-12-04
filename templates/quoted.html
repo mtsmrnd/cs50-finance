@@ -6,7 +6,21 @@
 
 {% block main %}
 
-TODO {{ symbol }}
-{{ stockInfo }}
+<table class="table">
+    <thead>
+        <tr>
+            <th scope="col">Symbol</th>
+            <th scope="col">Name</th>
+            <th scope="col">Current Price</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr scope="row">
+            <td>{{ stockInfo.symbol }}</td>
+            <td>{{ stockInfo.name }}</td>
+            <td>{{ stockInfo.price }}</td>
+        </tr>
+    </tbody>
+</table>
 
 {% endblock %}
