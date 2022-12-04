@@ -42,7 +42,7 @@ def after_request(response):
 @login_required
 def index():
     """Show portfolio of stocks"""
-    return apology("TODO")
+    return render_template("index.html")
 
 
 @app.route("/buy", methods=["GET", "POST"])
@@ -66,7 +66,7 @@ def buy():
             else:
                 db.execute("INSERT INTO transactions (share_symbol, share_price, share_qty, user_id) VALUES (?, ?, ?, ?)", company, price, shares, user)
                 db.execute("UPDATE users SET cash = cash - ? WHERE id = ?", price*shares, user)
-                return render_template("test.html", stockInfo=stockInfo, session=session, balance=balance)
+                return redirect("/")
     else:
         return render_template("buy.html")
 
