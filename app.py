@@ -102,7 +102,26 @@ def buy():
 @login_required
 def history():
     """Show history of transactions"""
-    return apology("TODO")
+    user = session["user_id"]
+    """GET DATA FOR TABLE"""
+    test = db.execute("SELECT * FROM transactions WHERE user_id = ? ORDER BY transaction_time DESC", user)
+    history = []
+    dictList = []
+    keys = ["name", "time", "share", "qty", "type", "price", "total"]
+    for i in range(len(test)):
+        history.append(lookup(test[i]["share_symbol"])["name"])
+        history.append(test[i]["transaction_time"])
+        history.append(test[i]["share_symbol"])
+        history.append(test[i]["share_qty"])
+        if test[i]["share_qty"] < 0:
+            history.append("Sell")
+        else:
+            history.append("Buy")
+        history.append(usd(test[i]["share_price"]))
+        history.append(usd(test[i]["share_qty"] * test[i]["share_price"]))
+        dictList.append(dict(zip(keys, history)))
+        history.clear()
+    return render_template("history.html", test=dictList)
 
 
 @app.route("/login", methods=["GET", "POST"])
