@@ -16,16 +16,40 @@ Index
             <th scope="col">Total Value</th>
         </tr>
     </thead>
-
+    <tbody>
+        {% for value in stocks %}
+        <tr scope="raw">
+            <td>{{ value.symbol }}</td>
+            <td>{{ value.name }}</td>
+            <td>{{ value.qty }}</td>
+            <td>{{ value.price }}</td>
+            <td>{{ value.total }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+    <tfoot>
+        <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td>Current Stock Value Balance:</td>
+            <td>{{ stockBalance }}</td>
+        </tr>
+        <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td>Current Cash Balance:</td>
+            <td>{{ cashBalance }}</td>
+        </tr>
+        <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td>Total Balance:</td>
+            <td>{{ totalBalance }}</td>
+        </tr>
+    </tfoot>
 </table>
 
-<div>
-    Current Cash Balance:
-</div>
-<div>
-    Current Stock Value Balance:
-</div>
-<div>
-    Total Balance:
-</div>
 {% endblock %}

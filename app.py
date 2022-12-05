@@ -42,7 +42,29 @@ def after_request(response):
 @login_required
 def index():
     """Show portfolio of stocks"""
-    return render_template("index.html")
+    user = session["user_id"]
+    stockBalance = 0
+
+    """GET DATA FOR TABLE"""
+    test = db.execute("SELECT share_symbol, share_qty FROM portfolio WHERE user_id = ?", user)
+    stocks = []
+    for i in range(len(test)):
+        aux = lookup(test[i]["share_symbol"])
+        stocks.append(aux)
+        stocks[i]["qty"] = test[i]["share_qty"]
+        stocks[i]["total"] = usd(test[i]["share_qty"] * aux["price"])
+        stockBalance += (test[i]["share_qty"] * aux["price"])
+
+    """Change stock balance to format"""
+    stockBalance = stockBalance
+    """GET BALANCE IN CASH"""
+    cashBalance = db.execute("SELECT cash FROM users WHERE id = ?", user)[0]["cash"]
+    """sum balances"""
+    totalBalance = usd(stockBalance + cashBalance)
+    stockBalance = usd(stockBalance)
+    cashBalance = usd(cashBalance)
+
+    return render_template("index.html", cashBalance=cashBalance, stocks=stocks, stockBalance=stockBalance, totalBalance=totalBalance)
 
 
 @app.route("/buy", methods=["GET", "POST"])
@@ -61,11 +83,16 @@ def buy():
             price = float(stockInfo["price"])
             shares = float(request.form.get("shares"))
             balance = float(db.execute("SELECT cash FROM users WHERE id = ?", user)[0]["cash"])
+            check_current = db.execute("SELECT EXISTS(SELECT 1 FROM portfolio WHERE user_id = ? AND share_symbol = ?) AS 'value'", user, company)[0]["value"]
             if price*shares > balance:
                 return apology("insufficient funds", 403)
             else:
                 db.execute("INSERT INTO transactions (share_symbol, share_price, share_qty, user_id) VALUES (?, ?, ?, ?)", company, price, shares, user)
                 db.execute("UPDATE users SET cash = cash - ? WHERE id = ?", price*shares, user)
+                if check_current != 0:
+                    db.execute("UPDATE portfolio SET share_qty = share_qty + ? WHERE user_id = ? AND share_symbol = ?", shares, user, company)
+                else:
+                    db.execute("INSERT INTO portfolio VALUES (?, ?, ?)", user, company, shares)
                 return redirect("/")
     else:
         return render_template("buy.html")
