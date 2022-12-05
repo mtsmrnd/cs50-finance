@@ -195,4 +195,32 @@ def register():
 @login_required
 def sell():
     """Sell shares of stock"""
-    return apology("TODO")
+    if request.method == "POST":
+        company = request.form.get("symbol")
+        if not company:
+            return apology("must provide stock", 403)
+        stockInfo = lookup(company)
+        user = session["user_id"]
+        if stockInfo is None:
+            return apology("invalid stock", 403)
+        else:
+            price = float(stockInfo["price"])
+            shares = float(request.form.get("shares"))
+            balance = float(db.execute("SELECT cash FROM users WHERE id = ?", user)[0]["cash"])
+            check_shares = db.execute("SELECT share_qty FROM portfolio WHERE share_symbol = ? AND user_id = ?", company, user)[0]["share_qty"]
+            new_shares = check_shares - shares
+            if new_shares < 0:
+                return apology("Not enough shares", 403)
+
+            db.execute("INSERT INTO transactions (share_symbol, share_price, share_qty, user_id) VALUES (?, ?, ?, ?)", company, price, (0 - shares), user)
+            db.execute("UPDATE users SET cash = cash + ? WHERE id = ?", price*shares, user)
+
+            if new_shares == 0:
+                db.execute("DELETE FROM portfolio WHERE user_id = ? AND share_symbol = ?", user, company)
+            else:
+                db.execute("UPDATE portfolio SET share_qty = ? WHERE share_symbol = ? AND user_id = ?", new_shares, company, user)
+            return redirect("/")
+    else:
+        return render_template("sell.html")
+
+
